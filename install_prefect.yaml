@@ -1,14 +1,14 @@
 ---
 - hosts: all
-  become: true
+  become: false
   vars:
     HOME: /home/stg
   tasks:
-    - name: install supporting apps
-      apt:
-        name:
-          - tmux
-        update_cache: true
+    # - name: install supporting apps
+    #   apt:
+    #     name:
+    #       - tmux
+    #     update_cache: true
 
     - name: Install prefect
       pip:
@@ -27,7 +27,7 @@
       file:
         path: "{{ HOME }}/.prefect"
         state: directory
-        # mode: 0777
+        mode: 0777
 
     - name: Creating a configuration file
       copy:
@@ -55,7 +55,7 @@
             username = "prefect"
             password = "Passw0rd"
             connection_url = "postgresql://${server.database.username}:${server.database.password}@${server.database.host}:${server.database.port}/${server.database.name}"
-            volume_path = "${home_dir}/pg_data"
+            volume_path = "/home/stg/pg_data"
 
     # - name: Running prefect
     #   shell: |
