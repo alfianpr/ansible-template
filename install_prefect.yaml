@@ -1,0 +1,73 @@
+---
+- hosts: all
+  become: true
+  vars:
+    HOME: /home/stg
+  tasks:
+    - name: install supporting apps
+      apt:
+        name:
+          - tmux
+        update_cache: true
+
+    - name: Install prefect
+      pip:
+        name: prefect==1.4.1
+    
+    # - name: Set backend to the server
+    #   shell: 
+    #     cmd: prefect backend server
+    #     chdir: "{{ HOME }}"
+    #   register: backend
+      
+    # - debug: 
+    #     msg: "{{backend.stdout_lines}}"
+    
+    - name: Create prefect config directory
+      file:
+        path: "{{ HOME }}/.prefect"
+        state: directory
+        # mode: 0777
+
+    - name: Creating a configuration file
+      copy:
+        dest: "{{ HOME }}/.prefect/config.toml"
+        content: |
+          backend="server"
+          [server]
+          host = "http://103.13.207.12"
+          port = "4200"
+          host_port = "4200"
+          endpoint = "${server.host}:${server.port}"
+
+            [server.ui]
+            host = "http://103.13.207.12"
+            port = "8080"
+            host_port = "8080"
+            endpoint = "${server.ui.host}:${server.ui.port}"
+            apollo_url = "${host}:4200/graphql"
+            
+            [server.database]
+            host = "localhost"
+            port = "5432"
+            host_port = "5432"
+            name = "prefect_server"
+            username = "prefect"
+            password = "Passw0rd"
+            connection_url = "postgresql://${server.database.username}:${server.database.password}@${server.database.host}:${server.database.port}/${server.database.name}"
+            volume_path = "${home_dir}/pg_data"
+
+    # - name: Running prefect
+    #   shell: |
+    #     tmux new-session -t Prefect -d
+    #     tmux split-window -h -t Prefect 
+
+    # # chdir: "{{ HOME }}"
+      
+    # #   register: prefect_start
+
+    # # - debug:
+    # #     msg: "{{prefect_start.stdout_lines}}"
+
+    # # tmux send -t Prefect:0.0 "prefect server start --use-volume --expose" C-m
+    # # tmux send -t Prefect:0.1 "prefect local agent start" C-m

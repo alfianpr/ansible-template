@@ -2,7 +2,7 @@
 - hosts: all
   become: true
   vars:
-    container_count: 4
+    # container_count: 4
     default_container_name: docker
     default_container_image: ubuntu
     default_container_command: sleep 1d
@@ -61,10 +61,15 @@
         dest: /usr/local/bin/docker-compose
         mode: 'u+x,g+x'
 
-    - name: Add user permissions
+    - name: Add docker user permissions
       user:
         name: "{{ ansible_env.SUDO_USER }}"
         groups: docker
+    
+    - name: Add docker-compose user permissions
+      file: 
+        dest: /usr/local/bin/docker-compose
+        mode: "+x"
 
 
     # - name: Pull default Docker image
